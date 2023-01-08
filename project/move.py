@@ -96,9 +96,41 @@ class Move(Node):
 
         self.vel_publisher.publish(msg)
     
-    def process_image(self, img):
+    def process_image(self, img): #Potrebno testiranje, nije sigurno da će ispravno raditi
         #TODO - napisati image processing
         #TODO - prepoznati predmet i koje je boje i prema tome postaviti self.target_exists i self.target_color
+        if cv2.__version__.startswith('2.'):
+            detector = cv2.SimpleBlobDetector()
+	else:
+            detector = cv2.SimpleBlobDetector_create()
+
+        frame = CvBridge().imgmsg_to_cv2(img)
+        hsv_green = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        mask_green = cv2.inRange(hsv,(40, 100, 20), (75, 255,255) )
+        keypoint_green = detector.detect(mask_green)
+        
+        hsv_yellow = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        mask_yellow = cv2.inRange(hsv,(28, 100, 20), (32, 255,255) )
+        keypoint_yellow = detector.detect(mask_green)
+        
+        hsv_red = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        mask_red = cv2.inRange(hsv,(0, 100, 20), (15, 255,255) )
+        keypoint_red = detector.detect(mask_green)
+        
+        if len(keypoint_green) > 0:
+            self.target_color = GREEN
+            self.target_exists = True   
+        elif len(keypoint_yellow) > 0:
+            self.target_color = YELLOW
+            self.target_exists = True
+        elif len(keypoint_red) > 0:
+            self.target_color = RED
+            self.target_exists = True
+        else:
+            self.target_exists = False
+            self.target_color = None                     
+        
+
 
         if(self.target_exists):
             #pozvati calculate_distance_angle za računanje udaljenosti i kuta do predmeta
