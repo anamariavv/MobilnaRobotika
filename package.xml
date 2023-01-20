@@ -4,7 +4,7 @@
   <name>project</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="anamariav@todo.todo">anamariav</maintainer>
+  <maintainer email="anamaria@todo.todo">anamaria</maintainer>
   <license>TODO: License declaration</license>
 
   <test_depend>ament_copyright</test_depend>
@@ -12,7 +12,7 @@
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
   
-  <exec_depend>rclpy</exec_depend>
+    <exec_depend>rclpy</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros2launch</exec_depend>
 
