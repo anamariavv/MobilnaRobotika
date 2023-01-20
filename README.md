@@ -15,3 +15,5 @@
 ## TODO
 - izračunati kut sa moments
 - izračunati udaljenost/postotak predmeta
+
+- resource direktorij mozda ni ne treba**
