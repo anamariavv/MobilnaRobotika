@@ -10,3 +10,8 @@
                       predmeta
                                       |
                                Kretanje prema predmetu
+
+
+## TODO
+- izračunati kut sa moments
+- izračunati udaljenost/postotak predmeta
