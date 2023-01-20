@@ -5,6 +5,9 @@ from rclpy.node import Node
 from math import atan2
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image
+import cv2
+import cv_bridge
+from cv_bridge import CvBridge
 
 Kp = 0.9
 MAX_ANGLE_DIFF = 0.3
@@ -47,7 +50,7 @@ class Move(Node):
 
         self.image_subscriber = self.create_subscription(
             Image, 
-            "/robot/camera/image", 
+            "/image_publisher", 
             self.process_image,
             10)
 
@@ -96,49 +99,49 @@ class Move(Node):
 
         self.vel_publisher.publish(msg)
     
-    def process_image(self, img): #Potrebno testiranje, nije sigurno da će ispravno raditi
-        #TODO - napisati image processing
-        #TODO - prepoznati predmet i koje je boje i prema tome postaviti self.target_exists i self.target_color
+    def process_image(self, img):
+        self.get_logger().info('Received image message!')
         if cv2.__version__.startswith('2.'):
             detector = cv2.SimpleBlobDetector()
-	else:
-            detector = cv2.SimpleBlobDetector_create()
+        else:
+            detector = cv2.SimpleBlobDetector_create()    
 
         frame = CvBridge().imgmsg_to_cv2(img)
         hsv_green = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask_green = cv2.inRange(hsv,(40, 100, 20), (75, 255,255) )
+        mask_green = cv2.inRange(hsv_green,(40, 100, 20), (75, 255,255) )
         keypoint_green = detector.detect(mask_green)
         
         hsv_yellow = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask_yellow = cv2.inRange(hsv,(28, 100, 20), (32, 255,255) )
-        keypoint_yellow = detector.detect(mask_green)
+        mask_yellow = cv2.inRange(hsv_yellow,(28, 100, 20), (32, 255,255) )
+        keypoint_yellow = detector.detect(mask_yellow)
         
         hsv_red = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask_red = cv2.inRange(hsv,(0, 100, 20), (15, 255,255) )
-        keypoint_red = detector.detect(mask_green)
+        mask_red = cv2.inRange(hsv_red,(0, 100, 20), (15, 255,255) )
+        keypoint_red = detector.detect(mask_red)
         
         if len(keypoint_green) > 0:
             self.target_color = GREEN
+            self.get_logger().info('color is green')
             self.target_exists = True   
         elif len(keypoint_yellow) > 0:
             self.target_color = YELLOW
+            self.get_logger().info('color is yellow')
             self.target_exists = True
         elif len(keypoint_red) > 0:
             self.target_color = RED
+            self.get_logger().info('color is red')
             self.target_exists = True
         else:
             self.target_exists = False
             self.target_color = None                     
         
-
-
-        if(self.target_exists):
-            #pozvati calculate_distance_angle za računanje udaljenosti i kuta do predmeta
-            self.calculate_distance_angle()
-            #pozvati move_robot sa izračunatom udaljenosti i kutom
-            self.move_robot()
-        else:
-            self.idle_robot()
+        # if(self.target_exists):
+        #     #pozvati calculate_distance_angle za računanje udaljenosti i kuta do predmeta
+        #     self.calculate_distance_angle()
+        #     #pozvati move_robot sa izračunatom udaljenosti i kutom
+        #     self.move_robot()
+        # else:
+        #     self.idle_robot()
 
 def main(args=None):
     rclpy.init(args=args)
